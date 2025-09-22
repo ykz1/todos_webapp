@@ -8,10 +8,6 @@ configure do
   set :session_secret, SecureRandom.hex(32) # this hardcodes our session secret to maintain the same session over app reloads
 end
 
-before do
-  session[:lists] ||= [] # makes sure that session[:lists] is never nil
-end
-
 helpers do
   def completion_progress(list)
     todos_count = list[:todos].count
@@ -23,6 +19,14 @@ helpers do
     list[:todos].count > 0 && list[:todos].all? { |todo| todo[:completed] }
   end
 
+  def list_class(list)
+    return "complete" if all_completed?(list)
+    ""
+  end
+end
+
+before do
+  session[:lists] ||= [] # makes sure that session[:lists] is never nil
 end
 
 get '/' do
