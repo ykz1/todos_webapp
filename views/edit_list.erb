@@ -1,8 +1,12 @@
 <section id="todos">
   <header>
-    <h2><%= @list[:name] %></h2>
+    <h2>Editing '<%= @list[:name] %>'</h2>
     <ul>
-      <li><a class="delete" href="/lists/<%= @list_index %>/delete">Delete</a></li>
+      <li>
+        <form action="/lists/<%= @list_index %>/delete" method="post">
+          <button type="submit" class="delete">Delete</button>
+        </form>
+      </li>
     </ul>
   </header>
 </section>
@@ -23,5 +27,5 @@
 </form>
 
 <% content_for :header_links do %>
-  <a class="list" class=href="/lists">All lists</a>
+  <a class="list" href="/lists">All lists</a>
 <% end %>

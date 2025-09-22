@@ -12,9 +12,26 @@ before do
   session[:lists] ||= [] # makes sure that session[:lists] is never nil
 end
 
+helpers do
+  def completion_progress(list)
+    todos_count = list[:todos].count
+    todos_completed = list[:todos].count { |todo| todo[:completed] }
+    "#{todos_completed} / #{todos_count}"
+  end
+
+  def all_completed?(list)
+    list[:todos].count > 0 && list[:todos].all? { |todo| todo[:completed] }
+  end
+
+end
+
 get '/' do
   redirect '/lists'
 end
+
+# not_found do
+#   redirect '/'
+# end
 
 # =================================
 # ROUTES
@@ -70,7 +87,7 @@ end
 # Validate todo item
 def error_for_todo_item(name, list)
   return "Todo name must be between 1 and 100 characters." if !(1..100).cover? name.size
-  return "Todo name must be unique." if list[:todos].include? name
+  nil
 end
 
 # Edit list name
@@ -99,28 +116,71 @@ post "/lists/:list_index/edit" do
   end
 end
 
-# Delete list
-get "/lists/:id/delete" do
-  session[:lists].delete_at(params[:id].to_i)
-  redirect "/"
-end
-
 
 # Add new todo
-post "/list/new" do
-  list_index = params[:list_index].to_i
-  @list = session[:lists][list_index]
-  todo_item = params[:todo_item]
+post "/lists/:list_index" do
+  @list_index = params[:list_index].to_i
+  @list = session[:lists][@list_index]
+  todo_name = params[:todo_item].strip
 
-  error_message = error_for_todo_item(todo_item, @list)
-
+  error_message = error_for_todo_item(todo_name, @list)
+  
   if error_message
     session[:error] = error_message
     erb :list, layout: :layout
   else
-    @list[:todos] << todo_item
-    @list[:success] = "Todo item added!"
-    redirect "/lists/#{list_index}"
+    @todo = {name: todo_name, completed: false}
+    @list[:todos] << @todo
+    session[:success] = "Todo item added!"
+    redirect "/lists/#{@list_index}"
   end
 end
 
+
+
+# Delete list
+post "/lists/:list_index/delete" do
+  session[:lists].delete_at(params[:list_index].to_i)
+  session[:success] = "List deleted"
+
+  redirect "/"
+end
+
+# Delete a todo
+post "/lists/:list_index/todos/:todo_index/delete" do
+  @list_index = params[:list_index].to_i
+  @list = session[:lists][@list_index]
+
+  todo_index = params[:todo_index].to_i
+  @list[:todos].delete_at todo_index
+
+  session[:success] = "Todo has been deleted."
+
+  redirect "/lists/#{params[:list_index]}"
+end
+
+# Complete a todo
+post "/lists/:list_index/todos/:todo_index" do
+  @list_index = params[:list_index].to_i
+  @list = session[:lists][@list_index]
+
+  todo_index = params[:todo_index].to_i
+  todo = @list[:todos][todo_index]
+  todo[:completed] = (params[:completed] == 'true')
+
+  session[:success] = todo[:completed] ? "Todo checked." : "Todo unchecked."
+
+  redirect "/lists/#{@list_index}"
+end
+
+# Complete all todos
+post "/lists/:list_index/complete_all" do
+  @list_index = params[:list_index].to_i
+  @list = session[:lists][@list_index]
+
+  @list[:todos].each { |todo| todo[:completed] = true }
+
+  session[:success] = "All todos marked completed."
+
+  redirect "/lists/#{@list_index}"
+end

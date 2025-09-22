@@ -4,7 +4,7 @@
       <label for="list_name">Enter the name for your new list:</label>
     </dt>
     <dd>
-      <input name="list_name" placeholder="List Name" type="text" value="">
+      <input name="list_name" placeholder="List Name" type="text" value="<%= params[:list_name] %>">
     </dd>
   </dl>
   <fieldset class="actions">
@@ -14,5 +14,5 @@
 </form>
 
 <% content_for :header_links do %>
-  <a class="list" class=href="/lists">All lists</a>
+  <a class="list" href="/lists">All lists</a>
 <% end %>
