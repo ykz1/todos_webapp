@@ -1,5 +1,5 @@
 require "sinatra"
-require "sinatra/reloader"
+require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubi"
 
@@ -22,6 +22,16 @@ helpers do
   def list_class(list)
     return "complete" if all_completed?(list)
     ""
+  end
+
+  def sort_lists(lists, &block)
+    lists.each_with_index { |list, index| yield(list, index) if !all_completed?(list) }
+    lists.each_with_index { |list, index| yield(list, index) if all_completed?(list) }
+  end
+
+  def sort_todos(todos)
+    todos.each_with_index { |todo, index| yield(todo, index) if !todo[:completed] }
+    todos.each_with_index { |todo, index| yield(todo, index) if todo[:completed] }
   end
 end
 
