@@ -4,6 +4,7 @@ require "sinatra/content_for"
 require "tilt/erubi"
 
 configure do
+  set :erb, :escape_html => true
   enable :sessions
   set :session_secret, SecureRandom.hex(32) # this hardcodes our session secret to maintain the same session over app reloads
 end
@@ -32,6 +33,14 @@ helpers do
   def sort_todos(todos)
     todos.each_with_index { |todo, index| yield(todo, index) if !todo[:completed] }
     todos.each_with_index { |todo, index| yield(todo, index) if todo[:completed] }
+  end
+
+  def load_list(list_index)
+    list = session[:lists][list_index]
+    return list if list
+
+    session[:error] = "List not found."
+    redirect '/lists'
   end
 end
 
@@ -94,7 +103,7 @@ end
 # View single list
 get "/lists/:list_index" do
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
   erb :list, layout: :layout
 end
 
@@ -107,7 +116,7 @@ end
 # Edit list name
 get "/lists/:list_index/edit" do
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
   erb :edit_list, layout: :layout
 end
 
@@ -115,7 +124,7 @@ end
 post "/lists/:list_index/edit" do
   @list_name = params[:list_name].strip
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
 
 
   error_message = error_for_list_name(@list_name)
@@ -134,7 +143,7 @@ end
 # Add new todo
 post "/lists/:list_index" do
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
   todo_name = params[:todo_item].strip
 
   error_message = error_for_todo_item(todo_name, @list)
@@ -163,7 +172,7 @@ end
 # Delete a todo
 post "/lists/:list_index/todos/:todo_index/delete" do
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
 
   todo_index = params[:todo_index].to_i
   @list[:todos].delete_at todo_index
@@ -176,7 +185,7 @@ end
 # Complete a todo
 post "/lists/:list_index/todos/:todo_index" do
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
 
   todo_index = params[:todo_index].to_i
   todo = @list[:todos][todo_index]
@@ -190,7 +199,7 @@ end
 # Complete all todos
 post "/lists/:list_index/complete_all" do
   @list_index = params[:list_index].to_i
-  @list = session[:lists][@list_index]
+  @list = load_list(@list_index)
 
   @list[:todos].each { |todo| todo[:completed] = true }
 
