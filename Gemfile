@@ -4,6 +4,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 gem "erubi"
 gem "webrick"
+gem "pg"
 
 group :production do
   gem "puma"
