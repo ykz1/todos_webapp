@@ -10,6 +10,7 @@ GEM
     nio4r (2.7.4)
     pg (1.6.2)
     pg (1.6.2-arm64-darwin)
+    pg (1.6.2-x86_64-linux)
     puma (7.0.3)
       nio4r (~> 2.0)
     rack (3.2.1)
@@ -40,6 +41,7 @@ GEM
 PLATFORMS
   arm64-darwin-24
   ruby
+  x86_64-linux
 
 DEPENDENCIES
   erubi
