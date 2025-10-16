@@ -15,7 +15,7 @@ class DatabasePersistence
 
   def find_list(id)
     sql = "SELECT * FROM lists WHERE id = $1;"
-    results =query(sql, id)
+    results = query(sql, id)
     tuple = results.first
     {id: tuple["id"], name: tuple["name"], todos: find_todos(tuple["id"])}
   end

@@ -186,7 +186,6 @@ post "/lists/:list_id/todos/:todo_id/delete" do
 
   todo_id = params[:todo_id].to_i
   @storage.delete_todo(@list_id, todo_id)
-  @list[:todos].delete_if { |todo| todo[:id] == todo_id }
 
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
     status 204
