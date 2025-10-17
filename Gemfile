@@ -5,6 +5,7 @@ gem "sinatra-contrib"
 gem "erubi"
 gem "webrick"
 gem "pg"
+gem "pry-byebug"
 
 group :production do
   gem "puma"

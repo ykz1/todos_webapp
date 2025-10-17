@@ -3,6 +3,7 @@ require "sinatra/content_for"
 require "tilt/erubi"
 require_relative "database_persistence"
 
+require "pry-byebug"
 
 configure do
   set :erb, :escape_html => true
@@ -19,13 +20,13 @@ end
 
 helpers do
   def completion_progress(list)
-    todos_count = list[:todos].count
-    todos_completed = list[:todos].count { |todo| todo[:completed] }
+    todos_count = list[:count_total]
+    todos_completed = list[:count_completed]
     "#{todos_completed} / #{todos_count}"
   end
 
   def all_completed?(list)
-    list[:todos].count > 0 && list[:todos].all? { |todo| todo[:completed] }
+    list[:count_total] > 0 && list[:count_completed] == list[:count_total]
   end
 
   def list_class(list)
@@ -125,6 +126,7 @@ end
 get "/lists/:list_id" do
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
+  @todos = @storage.load_todos(@list_id)
   erb :list, layout: :layout
 end
 
